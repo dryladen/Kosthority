@@ -31,64 +31,65 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Link from "next/link";
+import { signOutAction } from "@/app/actions";
+import { Separator } from "./ui/separator";
 
 // Menu items.
 const items = [
   {
     title: "Beranda",
-    url: "#",
+    url: "/beranda",
     icon: Home,
   },
   {
     title: "Bangunan",
-    url: "#",
+    url: "/bangunan",
     icon: Building,
   },
   {
     title: "Kamar",
-    url: "#",
+    url: "/kamar",
     icon: Bed,
   },
   {
     title: "Penyewa",
-    url: "#",
+    url: "/penyewa",
     icon: UserRound,
   },
   {
     title: "Transaksi",
-    url: "#",
+    url: "/transaksi",
     icon: ArrowRightLeft,
   },
   {
     title: "Laporan",
-    url: "#",
+    url: "/laporan",
     icon: FileChartColumn,
   },
   {
     title: "Catatan",
-    url: "#",
+    url: "/catatan",
     icon: NotebookText,
   },
   {
     title: "Tagihan",
-    url: "#",
+    url: "/tagihan",
     icon: FileText,
   },
   {
     title: "Kalkulasi",
-    url: "#",
+    url: "/kalkulasi",
     icon: Calculator,
   },
 ];
 
 export function AppSidebar() {
-  
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" >
+      <SidebarHeader className="p-4 border-b-[1px]">
         <span className="truncate font-semibold text-lg">Kosthority</span>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent >
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -121,11 +122,15 @@ export function AppSidebar() {
                 side="top"
                 className="w-[--radix-popper-anchor-width]"
               >
-                <DropdownMenuItem>
-                  <span>Akun</span>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Akun</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Log out</span>
+                <DropdownMenuItem asChild>
+                  <form action={signOutAction} className="w-full">
+                    <button className="button block" type="submit">
+                      Sign out
+                    </button>
+                  </form>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
