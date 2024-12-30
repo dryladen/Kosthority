@@ -11,14 +11,9 @@ const AuthButton = async () => {
   } = await supabase.auth.getUser();
 
   return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {user.email}!
-      <form action={signOutAction}>
-        <Button type="submit" variant={"outline"}>
-          Log out
-        </Button>
-      </form>
-    </div>
+    <Button asChild size="sm" variant={"outline"}>
+        <Link href="/beranda">Beranda</Link>
+      </Button>
   ) : (
     <div className="flex gap-4">
       <Button asChild size="sm" variant={"outline"}>
