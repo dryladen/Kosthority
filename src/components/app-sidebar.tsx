@@ -12,7 +12,6 @@ import {
   LogOut,
   NotebookText,
   User2,
-  UserPen,
   UserRound,
 } from "lucide-react";
 
@@ -37,6 +36,7 @@ import {
 import Link from "next/link";
 import { signOutAction } from "@/app/actions";
 import { usePathname } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 // Menu items.
 const items = [
@@ -87,21 +87,28 @@ const items = [
   },
 ];
 
-export function AppSidebar() {
+type Props = {
+  email: string | undefined;
+};
+export function AppSidebar({email} : Props) {
   const pathname = usePathname();
   return (
-    <Sidebar collapsible="icon" >
+    <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b-[1px]">
         <span className="truncate font-semibold text-lg">Kosthority</span>
       </SidebarHeader>
-      <SidebarContent >
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={pathname === item.url}
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -119,7 +126,7 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> Username
+                  <User2 /> {email}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -127,12 +134,22 @@ export function AppSidebar() {
                 side="top"
                 className="w-[--radix-popper-anchor-width]"
               >
-                <DropdownMenuItem asChild className={"cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent"} >
-                  <Link href="/profile" className="flex gap-2"><CircleUser size={16}/> Akun</Link>
+                <DropdownMenuItem
+                  asChild
+                  className={
+                    "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent"
+                  }
+                >
+                  <Link href="/profile" className="flex gap-2">
+                    <CircleUser size={16} /> Akun
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <form action={signOutAction} className="w-full">
-                    <button className="button flex gap-2 w-full text-start text-sidebar-foreground " type="submit">
+                    <button
+                      className="button flex gap-2 w-full text-start text-sidebar-foreground "
+                      type="submit"
+                    >
                       <LogOut size={16} />
                       Log out
                     </button>
