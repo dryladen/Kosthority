@@ -98,7 +98,7 @@ export function DataTable<TData, TValue>({
               <Button variant="outline" className="sm:ml-auto gap-2">
                 <Eye className="h-4 w-4" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Views
+                  Kolom
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -133,9 +133,7 @@ export function DataTable<TData, TValue>({
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead
-                        key={header.id}
-                      >
+                      <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -156,9 +154,7 @@ export function DataTable<TData, TValue>({
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                      >
+                      <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -173,7 +169,7 @@ export function DataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    Belum ada data
                   </TableCell>
                 </TableRow>
               )}

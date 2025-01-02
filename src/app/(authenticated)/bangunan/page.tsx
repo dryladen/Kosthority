@@ -2,6 +2,7 @@ import { DataTable } from '@/components/datatables/data-table'
 import React from 'react'
 import { columns } from './column'
 import { createClient } from '@/utils/supabase/server'
+import { api } from '@/trpc/server'
 
 export default async function page() {
   const supabase = await createClient()
