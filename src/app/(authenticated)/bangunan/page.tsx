@@ -1,7 +1,14 @@
+import { DataTable } from '@/components/datatables/data-table'
 import React from 'react'
+import { columns } from './column'
+import { createClient } from '@/utils/supabase/server'
 
-export default function page() {
+export default async function page() {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('apartment').select('id, name, description, address, gmaps, electric_number, water_number, created_at')
   return (
-    <div>Bangunan</div>
+    <>
+      <DataTable title='Bangunan' columns={columns} data={data || []} />
+    </>
   )
 }

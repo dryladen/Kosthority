@@ -1,27 +1,47 @@
-"use client"
+"use client";
 
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef } from "@tanstack/react-table";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type House = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
-}
+export type Apartment = {
+  id: string;
+  name: string;
+  description: string;
+  address: string;
+  gmaps: string;
+  electric_number: string;
+  water_number: string;
+  created_at: string;
+};
 
-export const columns: ColumnDef<House>[] = [
+export const columns: ColumnDef<Apartment>[] = [
   {
-    accessorKey: "status",
-    header: "Status",
+    id: "name",
+    header: "Nama",
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    id: "description",
+    header: "Deskripsi",
   },
   {
-    accessorKey: "amount",
-    header: "Amount",
+    id: "address",
+    header: "Alamat",
   },
-]
+  {
+    id: "gmaps",
+    header: "Google Maps",
+  },
+  {
+    id: "electric_number",
+    header: "Nomor Listrik",
+  },
+  {
+    id: "water_number",
+    header: "Nomor Air",
+  },
+  {
+    id: "created_at",
+    header: "Dibuat",
+  },
+];
