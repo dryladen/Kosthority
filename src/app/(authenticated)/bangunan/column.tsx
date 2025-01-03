@@ -1,6 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { ActionColumn } from "./actionColumn";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -16,6 +17,13 @@ export type Apartment = {
 };
 
 export const columns: ColumnDef<Apartment>[] = [
+  {
+    accessorKey: "id",
+    header: "ID",
+    meta: {
+      className: "hidden",
+    },
+  },
   {
     accessorKey: "name",
     header: "Nama",
@@ -52,6 +60,12 @@ export const columns: ColumnDef<Apartment>[] = [
         day: "numeric",
       });
       return <span>{formattedDate}</span>;
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      return <ActionColumn row={row} />;
     },
   },
 ];
