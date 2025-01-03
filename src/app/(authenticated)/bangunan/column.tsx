@@ -17,31 +17,41 @@ export type Apartment = {
 
 export const columns: ColumnDef<Apartment>[] = [
   {
-    id: "name",
+    accessorKey: "name",
     header: "Nama",
   },
   {
-    id: "description",
+    accessorKey: "description",
     header: "Deskripsi",
   },
   {
-    id: "address",
+    accessorKey: "address",
     header: "Alamat",
   },
+  // {
+  //   accessorKey: "gmaps",
+  //   header: "Google Maps",
+  // },
   {
-    id: "gmaps",
-    header: "Google Maps",
-  },
-  {
-    id: "electric_number",
+    accessorKey: "electric_number",
     header: "Nomor Listrik",
   },
   {
-    id: "water_number",
+    accessorKey: "water_number",
     header: "Nomor Air",
   },
   {
-    id: "created_at",
-    header: "Dibuat",
+    accessorKey: "created_at",
+    header: "Tanggal dibuat",
+    cell: ({ row }) => {
+      const created_at = new Date(row.getValue("created_at"));
+      const formattedDate = created_at.toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      return <span>{formattedDate}</span>;
+    },
   },
 ];
