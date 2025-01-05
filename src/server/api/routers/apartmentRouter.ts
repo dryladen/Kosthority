@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { authProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import { createClient } from "@/utils/supabase/server";
 
 // Mocked DB
 interface Post {
@@ -14,11 +15,14 @@ const posts: Post[] = [
 ];
 
 export const apartmentRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
+  list: authProcedure.query(async () => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("apartments")
+      .select(
+        "id, name, description, address, gmaps, electric_number, water_number, created_at"
+      );
+    if (error) throw new Error(error.message);
+    return data;
+  }),
 });

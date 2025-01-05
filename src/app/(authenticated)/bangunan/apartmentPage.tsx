@@ -1,14 +1,19 @@
-import { DataTable } from '@/components/datatables/data-table'
-import { columns } from './column'
-import { createClient } from '@/utils/supabase/server'
-
+import { DataTable } from "@/components/datatables/data-table";
+import { columns } from "./column";
+import { api, HydrateClient } from "@/trpc/server";
+import ApartmentForm from "./apartmentForm";
 
 export default async function ApartmentPage() {
-  const supabase = await createClient()
-  const { data } = await supabase.from('apartments').select('id, name, description, address, gmaps, electric_number, water_number, created_at')
+  const data = await api.apartment.list();
+  void api.apartment.list.prefetch();
   return (
     <>
-      <DataTable title='Bangunan' columns={columns} data={data ? data : []} />
+      <HydrateClient>
+        <DataTable title="Bangunan" columns={columns} data={data ? data : []} >
+          <ApartmentForm title="Tambah Data" description="Tambahkan bangunan baru"
+          modeUpdate={false} />
+        </DataTable>
+      </HydrateClient>
     </>
-  )
+  );
 }
