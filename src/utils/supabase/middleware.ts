@@ -48,6 +48,7 @@ export const updateSession = async (request: NextRequest) => {
       request.nextUrl.pathname !== "/" &&
       request.nextUrl.pathname !== "/sign-in" &&
       request.nextUrl.pathname !== "/sign-out" &&
+      request.nextUrl.pathname !== "/sign-up" &&
       user.error
     ) {
       return NextResponse.redirect(new URL("/protected", request.url));

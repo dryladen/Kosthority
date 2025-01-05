@@ -16,7 +16,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
             <p className="text-sm text-foreground">
               Belum punya akun ?{" "}
               <Link
-                className="text-foreground font-medium underline"
+                className="text-primary font-medium underline"
                 href="/sign-up"
               >
                 Daftar
