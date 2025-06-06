@@ -10,12 +10,17 @@ import { LoaderCircle, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { z } from "zod";
+import { api } from "@/trpc/react";
 
 type Props = {
   data?: {
     id: string;
     name: string;
-    base_unit: number;
+    description: string;
+    address: string;
+    gmaps: string;
+    electric_number: string;
+    water_number: string;
   };
   title: string;
   description: string;
@@ -25,14 +30,13 @@ type Props = {
 };
 
 const formSchema = z.object({
-  id_user : z.string(),
-  name : z.string().nonempty(),
-  description : z.string(),
-  address : z.string(),
-  gmaps : z.string(),
-  electric_number : z.string(),
-  water_number : z.string(),
-  created_at : z.string(),
+  id: z.string().optional(),
+  name: z.string().nonempty(),
+  description: z.string(),
+  address: z.string(),
+  gmaps: z.string(),
+  electric_number: z.string(),
+  water_number: z.string(),
 });
 
 const ApartmentForm = ({
@@ -51,31 +55,64 @@ const ApartmentForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues:
-      data ?? {
-        id_user: "",
+      !modeUpdate ? {
         name: "",
         description: "",
         address: "",
         gmaps: "",
         electric_number: "",
         water_number: "",
-        created_at: "",
-      }
-      
+      } : {
+        id: data?.id || "",
+        name: data?.name || "",
+        description: data?.description || "",
+        address: data?.address || "",
+        gmaps: data?.gmaps || "",
+        electric_number: data?.electric_number || "",
+        water_number: data?.water_number || "",
+      },
   });
+
+  // Add mutation hooks
+  const updateApartment = api.apartment.update.useMutation();
+  const createApartment = api.apartment.create.useMutation();
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
     setLoading(true);
-    let response;
-    // if (modeUpdate) {
-    //   response = await updateUnits(data.id, data.name, data.base_unit);
-    // } else {
-    //   response = await createUnits(data.name, data.base_unit);
-    // }
-    // toast({
-    //   title: response.message,
-    //   variant: response.success === true ? "default" : "destructive",
-    // });
+    try {
+      if (modeUpdate) {
+        await updateApartment.mutateAsync({
+          id: data.id ?? "",
+          name: data.name,
+          description: data.description,
+          address: data.address,
+          gmaps: data.gmaps,
+          electric_number: data.electric_number,
+          water_number: data.water_number,
+        });
+        toast({
+          title: "Data berhasil diperbarui",
+        });
+      } else {
+        await createApartment.mutateAsync({
+          name: data.name,
+          description: data.description,
+          address: data.address,
+          gmaps: data.gmaps,
+          electric_number: data.electric_number,
+          water_number: data.water_number,
+        });
+        toast({
+          title: "Data berhasil ditambahkan",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Terjadi kesalahan saat menyimpan data",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
     form.reset();
     router.refresh();
     setLoading(false);
@@ -96,16 +133,50 @@ const ApartmentForm = ({
               control={form.control}
               name="name"
               label="Nama"
-              placeholder="Contoh: Bawang"
+              placeholder="Contoh: Kost Joni"
             />
             <Input
               control={form.control}
               name="description"
-              label="Satuan dasar unit"
-              placeholder="Contoh: misal 1 kg = 1000 gram"
-              inputMode="numeric"
-              type="number"
-              pattern="[0-9]*"
+              label="Deskripsi"
+              placeholder="Contoh: Rumah nya ber AC"
+              inputMode="text"
+              type="text"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <Input
+                control={form.control}
+                name="electric_number"
+                label="No Listrik"
+                placeholder="Masukan nomor listrik"
+                inputMode="numeric"
+                type="number"
+                pattern="[0-9]*"
+              />
+              <Input
+                control={form.control}
+                name="water_number"
+                label="No Air"
+                placeholder="Masukan nomor air"
+                inputMode="numeric"
+                type="number"
+                pattern="[0-9]*"
+              />
+            </div>
+            <Input
+              control={form.control}
+              name="address"
+              label="Alamat"
+              type="text"
+              placeholder="Contoh: Jl. Raya No. 123, Jakarta"
+            />
+            <Input
+              control={form.control}
+              name="gmaps"
+              label="Link Google Maps"
+              type="url"
+              placeholder="Masukan link Google Maps"
             />
             <Button
               type="submit"
