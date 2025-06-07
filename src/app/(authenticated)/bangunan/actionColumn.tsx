@@ -46,11 +46,11 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
           <DropdownMenuLabel>Fitur</DropdownMenuLabel>
           <DropdownMenuItem>
             <Link
-              href={`/products/${row.getValue("id")}`}
+              href={`/bangunan/${row.getValue("id")}`}
               className="flex items-center bg-white p-1 w-full rounded-sm justify-start"
             >
               <ReceiptText className="h-4 w-4 mr-2 text-gray-500" />
-              <span>Details</span>
+              <span className="text-gray-700">Details</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -59,7 +59,7 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
               onClick={() => setDeleteOpen(true)}
               className="p-1 w-full justify-start h-fit border-0 bg-white hover:bg-white text-red-500"
             >
-              <Trash2 className="h-4 w-4 mr-2 " />
+              <Trash2 className="h-4 w-4 " />
               <span>Hapus</span>
             </Button>
           </DropdownMenuItem>
