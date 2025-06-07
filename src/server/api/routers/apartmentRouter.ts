@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { authProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import { authProcedure, createTRPCRouter } from "../trpc";
 import { createClient } from "@/utils/supabase/server";
-import { create } from "domain";
+import { Apartment } from "@/utils/types";
 
 export const apartmentRouter = createTRPCRouter({
   list: authProcedure.query(async () => {
@@ -9,11 +9,25 @@ export const apartmentRouter = createTRPCRouter({
     const { data, error } = await supabase
       .from("apartments")
       .select(
-        "id, name, description, address, gmaps, electric_number, water_number, created_at"
+      "id, name, description, address, gmaps, electric_number, water_number, created_at, user_id"
       );
     if (error) throw new Error(error.message);
-    return data;
+    return data as Apartment[];
   }),
+  getById: authProcedure
+    .input(z.string().min(1, "ID is required"))
+    .query(async ({ input }) => {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("apartments")
+        .select(
+          "id, name, description, address, gmaps, electric_number, water_number, created_at"
+        )
+        .eq("id", input)
+        .single();
+      if (error) throw new Error(error.message);
+      return data;
+    }),
   create: authProcedure
     .input(
       z.object({
