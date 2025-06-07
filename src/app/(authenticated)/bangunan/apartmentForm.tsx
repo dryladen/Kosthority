@@ -11,33 +11,17 @@ import { useState } from "react";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { z } from "zod";
 import { api } from "@/trpc/react";
+import { apartmentSchema } from "@/utils/schemas/apartment";
+import { Apartment } from "@/utils/types";
 
 type Props = {
-  data?: {
-    id: string;
-    name: string;
-    description: string;
-    address: string;
-    gmaps: string;
-    electric_number: string;
-    water_number: string;
-  };
+  data?: Apartment;
   title: string;
   description: string;
   modeUpdate: boolean;
   isUpdateOpen?: boolean;
   setUpdateOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 };
-
-const formSchema = z.object({
-  id: z.string().optional(),
-  name: z.string().nonempty(),
-  description: z.string(),
-  address: z.string(),
-  gmaps: z.string(),
-  electric_number: z.string(),
-  water_number: z.string(),
-});
 
 const ApartmentForm = ({
   data,
@@ -52,8 +36,8 @@ const ApartmentForm = ({
   const [loading, setLoading] = useState(false);
 
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof apartmentSchema>>({
+    resolver: zodResolver(apartmentSchema),
     defaultValues:
       !modeUpdate ? {
         name: "",
@@ -77,7 +61,7 @@ const ApartmentForm = ({
   const updateApartment = api.apartment.update.useMutation();
   const createApartment = api.apartment.create.useMutation();
 
-  const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof apartmentSchema>> = async (data) => {
     setLoading(true);
     try {
       if (modeUpdate) {
