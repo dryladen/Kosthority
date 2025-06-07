@@ -2,19 +2,10 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ActionColumn } from "./actionColumn";
+import { Apartment } from "@/utils/types";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Apartment = {
-  id: string;
-  name: string;
-  description: string;
-  address: string;
-  gmaps: string;
-  electric_number: string;
-  water_number: string;
-  created_at: string;
-};
 
 export const columns: ColumnDef<Apartment>[] = [
   {
@@ -36,10 +27,6 @@ export const columns: ColumnDef<Apartment>[] = [
     accessorKey: "address",
     header: "Alamat",
   },
-  // {
-  //   accessorKey: "gmaps",
-  //   header: "Google Maps",
-  // },
   {
     accessorKey: "electric_number",
     header: "Nomor Listrik",
