@@ -2,6 +2,7 @@ import { z } from "zod";
 import { authProcedure, createTRPCRouter } from "../trpc";
 import { createClient } from "@/utils/supabase/server";
 import { Apartment } from "@/utils/types";
+import { apartmentSchema } from "@/utils/schemas/apartment";
 
 export const apartmentRouter = createTRPCRouter({
   list: authProcedure.query(async () => {
@@ -9,7 +10,7 @@ export const apartmentRouter = createTRPCRouter({
     const { data, error } = await supabase
       .from("apartments")
       .select(
-      "id, name, description, address, gmaps, electric_number, water_number, created_at, user_id"
+        "id, name, description, address, gmaps, electric_number, water_number, created_at, user_id"
       );
     if (error) throw new Error(error.message);
     return data as Apartment[];
@@ -29,16 +30,7 @@ export const apartmentRouter = createTRPCRouter({
       return data;
     }),
   create: authProcedure
-    .input(
-      z.object({
-        name: z.string().min(1, "Name is required"),
-        description: z.string().optional(),
-        address: z.string().min(1, "Address is required"),
-        gmaps: z.string().url("Invalid Google Maps URL"),
-        electric_number: z.string().optional(),
-        water_number: z.string().optional(),
-      })
-    )
+    .input(apartmentSchema)
     .mutation(async ({ ctx, input }) => {
       const supabase = await createClient();
       const { data, error } = await supabase
@@ -58,17 +50,7 @@ export const apartmentRouter = createTRPCRouter({
       return data;
     }),
   update: authProcedure
-    .input(
-      z.object({
-        id: z.string().min(1, "ID is required"),
-        name: z.string().min(1, "Name is required"),
-        description: z.string().optional(),
-        address: z.string().optional(),
-        gmaps: z.string().url("Invalid Google Maps URL").optional(),
-        electric_number: z.string().optional(),
-        water_number: z.string().optional(),
-      })
-    )
+    .input(apartmentSchema)
     .mutation(async ({ ctx, input }) => {
       const supabase = await createClient();
       const { data, error } = await supabase
@@ -82,6 +64,18 @@ export const apartmentRouter = createTRPCRouter({
           water_number: input.water_number,
         })
         .eq("id", input.id)
+        .select();
+      if (error) throw new Error(error.message);
+      return data;
+    }),
+  delete: authProcedure
+    .input(z.string().min(1, "ID is required"))
+    .mutation(async ({ input }) => {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("apartments")
+        .delete()
+        .eq("id", input)
         .select();
       if (error) throw new Error(error.message);
       return data;
