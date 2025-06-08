@@ -1,6 +1,6 @@
 "use client"
 import { Row } from "@tanstack/react-table";
-import { Delete, MoreHorizontal, ReceiptText, Trash2 } from "lucide-react";
+import { MoreHorizontal, ReceiptText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useState } from "react";
-// import { toast } from "@/components/ui/use-toast";
 import DeleteDialog from "@/components/form-controller/deleteDialog";
+import { api } from "@/trpc/react";
+import { toast } from "sonner";
 
 interface ActionColumnProps<TData>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -22,17 +23,32 @@ interface ActionColumnProps<TData>
 
 export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const { refetch } = api.apartment.list.useQuery();
+  const deleteApartment = api.apartment.delete.useMutation({
+    onSuccess: async (response) => {
+      if (response) {
+        toast.success("Data berhasil dihapus");
+        refetch();
+      } else {
+        toast.error("Data gagal dihapus");
+      }
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || "Terjadi kesalahan saat menghapus data"
+      );
+    },
+  });
   return (
     <>
       <DeleteDialog
         deleteOpen={deleteOpen}
         setDeleteOpen={setDeleteOpen}
         actionFn={async () => {
-          // let response = await deleteProduct(row.getValue("id"));
-          // toast({
-          //   title: response.message,
-          //   variant: response.success === true ? "default" : "destructive",
-          // });
+          await deleteApartment.mutateAsync(
+            row.getValue("id")
+          );
+
         }}
       />
       <DropdownMenu>
