@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/form-controller/input";
 import { LoaderCircle, PlusCircle } from "lucide-react";
@@ -13,6 +12,7 @@ import { z } from "zod";
 import { api } from "@/trpc/react";
 import { apartmentSchema } from "@/utils/schemas/apartment";
 import { Apartment } from "@/utils/types";
+import { toast } from "sonner";
 
 type Props = {
   data?: Apartment;
@@ -74,9 +74,7 @@ const ApartmentForm = ({
           electric_number: data.electric_number,
           water_number: data.water_number,
         });
-        toast({
-          title: "Data berhasil diperbarui",
-        });
+        toast.success("Data berhasil diperbarui");
       } else {
         await createApartment.mutateAsync({
           name: data.name,
@@ -86,16 +84,10 @@ const ApartmentForm = ({
           electric_number: data.electric_number,
           water_number: data.water_number,
         });
-        toast({
-          title: "Data berhasil ditambahkan",
-        });
+        toast.success("Data berhasil ditambahkan");
       }
     } catch (error) {
-      toast({
-        title: "Terjadi kesalahan saat menyimpan data",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
+      toast.error(`Terjadi kesalahan: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
     form.reset();
     router.refresh();
@@ -160,6 +152,7 @@ const ApartmentForm = ({
               name="gmaps"
               label="Link Google Maps"
               type="url"
+              required={false}
               placeholder="Masukan link Google Maps"
             />
             <Button
