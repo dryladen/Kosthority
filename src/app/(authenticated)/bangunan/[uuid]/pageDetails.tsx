@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ChevronLeft, Copy, Trash2, Upload } from "lucide-react";
+import { ChevronLeft, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -9,16 +9,13 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/form-controller/input";
-import { Form } from "@/components/ui/form";
-import { Suspense, useState } from "react";
 import DeleteDialog from "@/components/form-controller/deleteDialog";
 import { Apartment } from "@/utils/types";
 import ApartmentForm from "../apartmentForm";
+import { api } from "@/trpc/react";
 
 type Props = {
     data: Apartment
@@ -29,19 +26,39 @@ const PageDetails = ({
 }: Props) => {
     const [isUpdate, setIsUpdate] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const router = useRouter();
+    
+    const deleteMutation = api.apartment.delete.useMutation({
+        onSuccess: () => {
+            toast({
+                title: "Berhasil menghapus data bangunan",
+                variant: "default",
+            });
+            router.push("/bangunan");
+        },
+        onError: (error) => {
+            toast({
+                title: "Gagal menghapus data bangunan",
+                description: error.message,
+                variant: "destructive",
+            });
+        },
+    });
+
+    const handleDelete = async () => {
+        try {
+            await deleteMutation.mutateAsync(data.id);
+        } catch (error) {
+            // Error handling is done in onError callback
+        }
+    };
+    
     return (
         <div className="flex flex-col gap-4 w-full">
             <DeleteDialog
                 deleteOpen={deleteOpen}
                 setDeleteOpen={setDeleteOpen}
-                actionFn={async () => {
-                    // let response = await deleteProduct(productId);
-                    // toast({
-                    //     title: response.message,
-                    //     variant: response.success === true ? "default" : "destructive",
-                    // });
-                    // router.push("/products");
-                }}
+                actionFn={handleDelete}
             />
             <ApartmentForm
                 data={data}
@@ -75,9 +92,10 @@ const PageDetails = ({
                     variant="destructive"
                     size="sm"
                     type="button"
+                    disabled={deleteMutation.isPending}
                     onClick={() => setDeleteOpen(true)}
                 >
-                    Hapus
+                    {deleteMutation.isPending ? "Menghapus..." : "Hapus"}
                 </Button>
             </div>
             <div className="flex flex-col gap-4">
@@ -170,10 +188,10 @@ const PageDetails = ({
                     type="button"
                     variant="destructive"
                     size="sm"
-                    disabled={isUpdate}
+                    disabled={isUpdate || deleteMutation.isPending}
                     onClick={() => setDeleteOpen(true)}
                 >
-                    Hapus
+                    {deleteMutation.isPending ? "Menghapus..." : "Hapus"}
                 </Button>
             </div>
         </div>
