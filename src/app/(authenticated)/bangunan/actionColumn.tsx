@@ -23,15 +23,12 @@ interface ActionColumnProps<TData>
 
 export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const { refetch } = api.apartment.list.useQuery();
+
   const deleteApartment = api.apartment.delete.useMutation({
-    onSuccess: async (response) => {
-      if (response) {
-        toast.success("Data berhasil dihapus");
-        refetch();
-      } else {
-        toast.error("Data gagal dihapus");
-      }
+    onSuccess: () => {
+      toast.success("Data berhasil dihapus");
+      // Refresh halaman untuk update data
+      window.location.reload();
     },
     onError: (error) => {
       toast.error(
@@ -39,17 +36,27 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
       );
     },
   });
+
+  const handleDelete = async () => {
+    try {
+      await deleteApartment.mutateAsync(row.getValue("id"));
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteOpen(true);
+  };
+
+  const apartmentId = row.getValue("id") as string;
+
   return (
     <>
       <DeleteDialog
         deleteOpen={deleteOpen}
         setDeleteOpen={setDeleteOpen}
-        actionFn={async () => {
-          await deleteApartment.mutateAsync(
-            row.getValue("id")
-          );
-
-        }}
+        actionFn={handleDelete}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -60,20 +67,22 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Fitur</DropdownMenuLabel>
-          <DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link
-              href={`/bangunan/${row.getValue("id")}`}
-              className="flex items-center bg-white p-1 w-full rounded-sm justify-start"
+              href={`/bangunan/${apartmentId}`}
+              className="flex items-center w-full"
+              prefetch={false}
             >
-              <ReceiptText className="h-4 w-4 mr-2 text-gray-500" />
-              <span className="text-gray-700">Details</span>
+              <ReceiptText className="h-4 w-4 mr-2" />
+              <span>Details</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Button
-              onClick={() => setDeleteOpen(true)}
-              className="p-1 w-full justify-start h-fit border-0 bg-white hover:bg-white text-red-500"
+              onClick={handleDeleteClick}
+              className=" w-full justify-start h-fit border-0"
+              variant="destructive"
             >
               <Trash2 className="h-4 w-4 " />
               <span>Hapus</span>

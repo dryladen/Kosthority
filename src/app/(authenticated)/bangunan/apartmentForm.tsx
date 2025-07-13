@@ -35,64 +35,95 @@ const ApartmentForm = ({
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
   const form = useForm<z.infer<typeof apartmentSchema>>({
     resolver: zodResolver(apartmentSchema),
-    defaultValues:
-      !modeUpdate ? {
-        name: "",
-        description: "",
-        address: "",
-        gmaps: "",
-        electric_number: "",
-        water_number: "",
-      } : {
-        id: data?.id || "",
-        name: data?.name || "",
-        description: data?.description || "",
-        address: data?.address || "",
-        gmaps: data?.gmaps || "",
-        electric_number: data?.electric_number || "",
-        water_number: data?.water_number || "",
-      },
+    defaultValues: !modeUpdate ? {
+      name: "",
+      description: "",
+      address: "",
+      gmaps: "",
+      electric_number: "",
+      water_number: "",
+    } : {
+      id: data?.id || "",
+      name: data?.name || "",
+      description: data?.description || "",
+      address: data?.address || "",
+      gmaps: data?.gmaps || "",
+      electric_number: data?.electric_number || "",
+      water_number: data?.water_number || "",
+    },
   });
 
-  // Add mutation hooks
-  const updateApartment = api.apartment.update.useMutation();
-  const createApartment = api.apartment.create.useMutation();
+  // Simple mutations without utils
+  const updateApartment = api.apartment.update.useMutation({
+    onSuccess: () => {
+      toast.success("Data berhasil diperbarui");
+      form.reset();
+      setUpdateOpen ? setUpdateOpen(false) : setIsOpen(false);
+      router.refresh();
+      setLoading(false);
+    },
+    onError: (error) => {
+      toast.error(`Gagal memperbarui data: ${error.message}`);
+      setLoading(false);
+    },
+  });
 
-  const onSubmit: SubmitHandler<z.infer<typeof apartmentSchema>> = async (data) => {
+  const createApartment = api.apartment.create.useMutation({
+    onSuccess: () => {
+      toast.success("Data berhasil ditambahkan");
+      form.reset();
+      setUpdateOpen ? setUpdateOpen(false) : setIsOpen(false);
+      router.refresh();
+      setLoading(false);
+    },
+    onError: (error) => {
+      toast.error(`Gagal menambah data: ${error.message}`);
+      setLoading(false);
+    },
+  });
+
+  const onSubmit: SubmitHandler<z.infer<typeof apartmentSchema>> = async (formData) => {
     setLoading(true);
+    
     try {
       if (modeUpdate) {
         await updateApartment.mutateAsync({
-          id: data.id ?? "",
-          name: data.name,
-          description: data.description,
-          address: data.address,
-          gmaps: data.gmaps,
-          electric_number: data.electric_number,
-          water_number: data.water_number,
+          id: formData.id ?? "",
+          name: formData.name,
+          description: formData.description,
+          address: formData.address,
+          gmaps: formData.gmaps,
+          electric_number: formData.electric_number,
+          water_number: formData.water_number,
         });
-        toast.success("Data berhasil diperbarui");
       } else {
         await createApartment.mutateAsync({
-          name: data.name,
-          description: data.description,
-          address: data.address,
-          gmaps: data.gmaps,
-          electric_number: data.electric_number,
-          water_number: data.water_number,
+          name: formData.name,
+          description: formData.description,
+          address: formData.address,
+          gmaps: formData.gmaps,
+          electric_number: formData.electric_number,
+          water_number: formData.water_number,
         });
-        toast.success("Data berhasil ditambahkan");
       }
     } catch (error) {
-      toast.error(`Terjadi kesalahan: ${error instanceof Error ? error.message : "Unknown error"}`);
+      // Error handling sudah ada di mutation callbacks
+      console.error("Form submission error:", error);
     }
-    form.reset();
-    router.refresh();
-    setLoading(false);
-    setUpdateOpen ? setUpdateOpen(false) : setIsOpen(false);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (modeUpdate) {
+      setUpdateOpen?.(open);
+    } else {
+      setIsOpen(open);
+    }
+  };
+
+  const handleButtonClick = () => {
+    setIsOpen(true);
   };
 
   return (
@@ -120,7 +151,6 @@ const ApartmentForm = ({
               type="text"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               <Input
                 control={form.control}
                 name="electric_number"
@@ -158,7 +188,7 @@ const ApartmentForm = ({
             <Button
               type="submit"
               className="w-full"
-              {...(loading && { disabled: true })}
+              disabled={loading}
             >
               {loading && <LoaderCircle size={24} className="animate-spin" />}
               Simpan
@@ -167,8 +197,8 @@ const ApartmentForm = ({
         </Form>
       </ResponsiveDialog>
       {!modeUpdate && (
-        <Button type="button" onClick={() => setIsOpen(!isOpen)}>
-          <PlusCircle className="" size={16} />
+        <Button type="button" onClick={handleButtonClick}>
+          <PlusCircle className="mr-2" size={16} />
           <span className="hidden sm:flex">Tambah data</span>
         </Button>
       )}
