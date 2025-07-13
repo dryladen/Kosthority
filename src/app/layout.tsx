@@ -27,15 +27,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
           <Toaster />
-        </ThemeProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );
