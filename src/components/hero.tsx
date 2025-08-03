@@ -17,14 +17,6 @@ export default function Header() {
           Didesain untuk pemilik properti yang menginginkan kemudahan dan
           efisiensi dalam mengelola bisnis rental mereka.
         </p>
-        <div className="flex gap-4">
-          <Button asChild size="sm" variant={"outline"}>
-            <Link href="/sign-in">Masuk</Link>
-          </Button>
-          <Button asChild size="sm" variant={"default"}>
-            <Link href="/sign-up">Daftar</Link>
-          </Button>
-        </div>
       </div>
       <div className="flex items-center justify-end">
         <div className="w-72 md:w-full lg:w-48 xl:w-80">
