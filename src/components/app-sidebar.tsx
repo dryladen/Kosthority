@@ -38,53 +38,73 @@ import { signOutAction } from "@/app/actions";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
-// Menu items.
-const items = [
+// Menu items - Dikelompokkan berdasarkan kategori
+const menuGroups = [
   {
-    title: "Beranda",
-    url: "/beranda",
-    icon: Home,
+    label: "Utama",
+    items: [
+      {
+        title: "Beranda",
+        url: "/beranda",
+        icon: Home,
+      },
+    ]
   },
   {
-    title: "Bangunan",
-    url: "/bangunan",
-    icon: Building,
+    label: "Data Master",
+    items: [
+      {
+        title: "Bangunan",
+        url: "/bangunan",
+        icon: Building,
+      },
+      {
+        title: "Kamar",
+        url: "/kamar",
+        icon: Bed,
+      },
+      {
+        title: "Penyewa",
+        url: "/penyewa",
+        icon: UserRound,
+      },
+    ]
   },
   {
-    title: "Kamar",
-    url: "/kamar",
-    icon: Bed,
+    label: "Operasional",
+    items: [
+      {
+        title: "Transaksi",
+        url: "/transaksi",
+        icon: ArrowRightLeft,
+      },
+      {
+        title: "Tagihan",
+        url: "/tagihan",
+        icon: FileText,
+      },
+    ]
   },
   {
-    title: "Penyewa",
-    url: "/penyewa",
-    icon: UserRound,
-  },
-  {
-    title: "Transaksi",
-    url: "/transaksi",
-    icon: ArrowRightLeft,
-  },
-  {
-    title: "Laporan",
-    url: "/laporan",
-    icon: FileChartColumn,
-  },
-  {
-    title: "Catatan",
-    url: "/catatan",
-    icon: NotebookText,
-  },
-  {
-    title: "Tagihan",
-    url: "/tagihan",
-    icon: FileText,
-  },
-  {
-    title: "Kalkulasi",
-    url: "/kalkulasi",
-    icon: Calculator,
-  },
+    label: "Manajemen",
+    items: [
+      {
+        title: "Laporan",
+        url: "/laporan",
+        icon: FileChartColumn,
+      },
+      {
+        title: "Kalkulasi",
+        url: "/kalkulasi",
+        icon: Calculator,
+      },
+      {
+        title: "Catatan",
+        url: "/catatan",
+        icon: NotebookText,
+      },
+    ]
+  }
 ];
 
 type Props = {
@@ -98,27 +118,29 @@ export function AppSidebar({email} : Props) {
         <span className="truncate font-semibold text-lg">Kosthority</span>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    isActive={pathname === item.url}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {menuGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.title}
+                      isActive={pathname === item.url}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
