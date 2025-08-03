@@ -3,17 +3,9 @@ import { columns } from "./column";
 import { api, HydrateClient } from "@/trpc/server";
 import PaymentForm from "./paymentForm";
 
-interface PaymentPageProps {
-  searchParams?: {
-    rental?: string;
-  }
-}
-
-export default async function PaymentPage({ searchParams }: PaymentPageProps) {
+export default async function PaymentPage() {
   const data = await api.payment.list();
   void api.payment.list.prefetch();
-  
-  const preSelectedRentalId = searchParams?.rental;
   
   return (
     <HydrateClient>
@@ -23,7 +15,6 @@ export default async function PaymentPage({ searchParams }: PaymentPageProps) {
             title="Catat Pembayaran" 
             description="Catat pembayaran dari penyewa"
             modeUpdate={false}
-            preSelectedRentalId={preSelectedRentalId}
           />
         </DataTable>
       </div>

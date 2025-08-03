@@ -21,7 +21,6 @@ type Props = {
   modeUpdate: boolean;
   isUpdateOpen?: boolean;
   setUpdateOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  preSelectedRentalId?: string; // Untuk pre-select rental dari parameter URL
 };
 
 const PaymentForm = ({
@@ -31,7 +30,6 @@ const PaymentForm = ({
   modeUpdate,
   isUpdateOpen,
   setUpdateOpen,
-  preSelectedRentalId,
 }: Props) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -43,7 +41,7 @@ const PaymentForm = ({
   const form = useForm<z.infer<typeof paymentSchema>>({
     resolver: zodResolver(paymentSchema),
     defaultValues: !modeUpdate ? {
-      rental_id: preSelectedRentalId || "",
+      rental_id: "",
       amount: "",
       note: "",
       for_month: new Date().toISOString().split('T')[0], // Current month
