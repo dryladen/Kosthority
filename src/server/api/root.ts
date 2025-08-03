@@ -3,6 +3,8 @@ import { apartmentRouter } from "./routers/apartmentRouter";
 import { authRouter } from "./routers/authRouter";
 import { roomRouter } from "./routers/roomRouter";
 import { tenantRouter } from "./routers/tenantRouter";
+import { rentalRouter } from "./routers/rentalRouter";
+import { paymentRouter } from "./routers/paymentRouter";
 
 /**
  * This is the primary router for your server.
@@ -13,6 +15,8 @@ export const appRouter = createTRPCRouter({
   apartment: apartmentRouter,
   room: roomRouter,
   tenant: tenantRouter,
+  rental: rentalRouter,
+  payment: paymentRouter,
   auth: authRouter,
 });
 
