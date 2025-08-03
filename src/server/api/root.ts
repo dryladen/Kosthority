@@ -1,6 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { apartmentRouter } from "./routers/apartmentRouter";
 import { authRouter } from "./routers/authRouter";
+import { roomRouter } from "./routers/roomRouter";
 
 /**
  * This is the primary router for your server.
@@ -9,6 +10,7 @@ import { authRouter } from "./routers/authRouter";
  */
 export const appRouter = createTRPCRouter({
   apartment: apartmentRouter,
+  room: roomRouter,
   auth: authRouter,
 });
 
