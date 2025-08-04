@@ -68,8 +68,8 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
             />
             <RentalForm
                 data={rentalData}
-                title="Edit Transaksi"
-                description="Edit data transaksi sewa"
+                title="Edit"
+                description="Edit data penghuni"
                 modeUpdate={true}
                 isUpdateOpen={updateOpen}
                 setUpdateOpen={setUpdateOpen}

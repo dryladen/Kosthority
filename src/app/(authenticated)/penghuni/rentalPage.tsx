@@ -9,10 +9,10 @@ export default async function RentalPage() {
   return (
     <HydrateClient>
       <div className="space-y-4">
-        <DataTable title="Transaksi Sewa" search="tenantName" columns={columns} data={data ?? []}>
+        <DataTable title="Penghuni Sewa" search="tenantName" columns={columns} data={data ?? []}>
           <RentalForm 
-            title="Tambah Transaksi" 
-            description="Tambahkan transaksi sewa baru"
+            title="Tambah Penghuni" 
+            description="Tambahkan penghuni baru"
             modeUpdate={false} 
           />
         </DataTable>
