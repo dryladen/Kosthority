@@ -7,15 +7,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type Props = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 export default async function DetailPembayaranPage({ params }: Props) {
   try {
-    const rentalDetail = await api.report.rentalPaymentDetail(params.id);
-    void api.report.rentalPaymentDetail.prefetch(params.id);
+    const { id } = await params;
+    const rentalDetail = await api.report.rentalPaymentDetail(id);
+    void api.report.rentalPaymentDetail.prefetch(id);
 
     const { rental, payments } = rentalDetail;
 
@@ -263,7 +264,7 @@ export default async function DetailPembayaranPage({ params }: Props) {
             <CardContent>
               <div className="flex gap-2">
                 <Button asChild>
-                  <Link href={`/tagihan?rental=${params.id}`}>
+                  <Link href={`/tagihan?rental=${id}`}>
                     <CreditCard className="h-4 w-4 mr-2" />
                     Catat Pembayaran
                   </Link>
