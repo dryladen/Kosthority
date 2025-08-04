@@ -25,6 +25,7 @@ export const paymentRouter = createTRPCRouter({
             .order('for_month', { ascending: false });
         if (error) throw new Error(error.message);
         return data as unknown as (Payment & {
+            created_at: string;
             rentals: {
                 monthly_price: string;
                 houses: { name: string; apartments: { name: string } };

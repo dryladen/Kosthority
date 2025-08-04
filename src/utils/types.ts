@@ -31,6 +31,7 @@ export type Rental = {
     move_in: string; // date
     move_out: string; // date
     monthly_price: string; // text
+    status: 'active' | 'completed' | 'terminated' | 'cancelled'; // rental status
     note?: string; // text
 };
 
