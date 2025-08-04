@@ -1,7 +1,7 @@
-import { signOutAction } from "@/app/actions";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
+import { ThemeSwitcher } from "./theme-switcher";
 
 const AuthButton = async () => {
   const supabase = await createClient();
@@ -11,11 +11,15 @@ const AuthButton = async () => {
   } = await supabase.auth.getUser();
 
   return user ? (
-    <Button asChild size="sm" variant={"outline"}>
+    <div className="flex items-center gap-4">
+      <ThemeSwitcher />
+      <Button asChild size="sm" variant={"outline"}>
         <Link href="/beranda">Beranda</Link>
       </Button>
+    </div>
   ) : (
     <div className="flex gap-4">
+      <ThemeSwitcher />
       <Button asChild size="sm" variant={"outline"}>
         <Link href="/sign-in">Masuk</Link>
       </Button>

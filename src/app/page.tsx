@@ -149,13 +149,13 @@ export default async function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                   href="/sign-up" 
-                  className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                  className="bg-secondary text-primary px-8 py-3 rounded-lg font-semibold transition-colors"
                 >
                   Mulai Gratis Sekarang
                 </Link>
                 <Link 
                   href="/sign-in" 
-                  className="border border-white/20 px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
+                  className="border border-secondary/20 px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
                 >
                   Sudah Punya Akun?
                 </Link>
@@ -163,17 +163,18 @@ export default async function Home() {
               <p className="mt-4 text-sm opacity-75">Gratis 30 hari • Tidak perlu kartu kredit • Setup dalam 5 menit</p>
             </section>
           </div>
-          <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
+          <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-4">
             <p>
-              Build With{" "}
-              <a
-                href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
+              ©{" "}
+              <Link
+                href="https://www.delfanladen.my.id/"
                 target="_blank"
                 className="font-bold hover:underline"
                 rel="noreferrer"
               >
-                Next Js & Supabase
-              </a>
+                Delfan Rynaldo Laden
+              </Link>
+              .{" "}All rights reserved.
             </p>
             <ThemeSwitcher />
           </footer>
