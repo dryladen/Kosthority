@@ -38,6 +38,9 @@ const RentalForm = ({
   // Fetch rooms and tenants for selection
   const { data: rooms, isLoading: roomsLoading } = api.room.list.useQuery();
   const { data: tenants, isLoading: tenantsLoading } = api.tenant.list.useQuery();
+  
+  // Get utils for cache invalidation
+  const utils = api.useUtils();
 
   const form = useForm<z.infer<typeof rentalSchema>>({
     resolver: zodResolver(rentalSchema),
@@ -47,6 +50,7 @@ const RentalForm = ({
       move_in: "",
       move_out: "",
       monthly_price: "",
+      status: "active",
       note: "",
     } : {
       id: data?.id || "",
@@ -55,6 +59,7 @@ const RentalForm = ({
       move_in: data?.move_in || "",
       move_out: data?.move_out || "",
       monthly_price: data?.monthly_price || "",
+      status: data?.status || "active",
       note: data?.note || "",
     },
   });
@@ -66,6 +71,8 @@ const RentalForm = ({
       form.reset();
       setUpdateOpen ? setUpdateOpen(false) : setIsOpen(false);
       router.refresh();
+      // Invalidate room cache to update room status
+      utils.room.list.invalidate();
       setLoading(false);
     },
     onError: (error) => {
@@ -80,6 +87,8 @@ const RentalForm = ({
       form.reset();
       setUpdateOpen ? setUpdateOpen(false) : setIsOpen(false);
       router.refresh();
+      // Invalidate room cache to update room status
+      utils.room.list.invalidate();
       setLoading(false);
     },
     onError: (error) => {
@@ -100,6 +109,7 @@ const RentalForm = ({
           move_in: formData.move_in,
           move_out: formData.move_out,
           monthly_price: formData.monthly_price,
+          status: formData.status,
           note: formData.note,
         });
       } else {
@@ -109,6 +119,7 @@ const RentalForm = ({
           move_in: formData.move_in,
           move_out: formData.move_out,
           monthly_price: formData.monthly_price,
+          status: formData.status,
           note: formData.note,
         });
       }
@@ -170,7 +181,10 @@ const RentalForm = ({
                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="">{roomsLoading ? "Loading..." : "Pilih kamar"}</option>
-                        {rooms?.filter(room => room.status === 'available').map((room) => (
+                        {rooms?.filter(room => 
+                          room.status === 'available' || 
+                          (modeUpdate && room.id === data?.house_id)
+                        ).map((room) => (
                           <option key={room.id} value={room.id}>
                             {room.apartments?.name} - {room.name}
                           </option>
@@ -205,6 +219,31 @@ const RentalForm = ({
               type="number"
               pattern="[0-9]*"
             />
+            
+            {modeUpdate && (
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status Sewa</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="active">Aktif</option>
+                        <option value="completed">Selesai</option>
+                        <option value="terminated">Dihentikan</option>
+                        <option value="cancelled">Dibatalkan</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
             <Input
               control={form.control}
               name="note"

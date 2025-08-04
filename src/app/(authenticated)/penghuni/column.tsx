@@ -98,6 +98,35 @@ export const columns: ColumnDef<RentalWithRelations>[] = [
     },
   },
   {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      const statusLabels = {
+        active: "Aktif",
+        completed: "Selesai",
+        terminated: "Dihentikan",
+        cancelled: "Dibatalkan"
+      };
+      
+      const statusColors = {
+        active: "bg-green-100 text-green-800",
+        completed: "bg-blue-100 text-blue-800",
+        terminated: "bg-orange-100 text-orange-800",
+        cancelled: "bg-red-100 text-red-800"
+      };
+      
+      return (
+        <Badge 
+          variant="secondary" 
+          className={statusColors[status as keyof typeof statusColors] || "bg-gray-100 text-gray-800"}
+        >
+          {statusLabels[status as keyof typeof statusLabels] || status}
+        </Badge>
+      );
+    },
+  },
+  {
     accessorKey: "note",
     header: "Catatan",
     cell: ({ row }) => {
