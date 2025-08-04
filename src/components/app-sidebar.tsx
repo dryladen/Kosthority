@@ -51,6 +51,21 @@ const menuGroups = [
     ]
   },
   {
+    label: "Operasional",
+    items: [
+      {
+        title: "Penghuni",
+        url: "/penghuni",
+        icon: ArrowRightLeft,
+      },
+      {
+        title: "Tagihan",
+        url: "/tagihan",
+        icon: FileText,
+      },
+    ]
+  },
+  {
     label: "Data Master",
     items: [
       {
@@ -67,21 +82,6 @@ const menuGroups = [
         title: "Penyewa",
         url: "/penyewa",
         icon: UserRound,
-      },
-    ]
-  },
-  {
-    label: "Operasional",
-    items: [
-      {
-        title: "Transaksi",
-        url: "/transaksi",
-        icon: ArrowRightLeft,
-      },
-      {
-        title: "Tagihan",
-        url: "/tagihan",
-        icon: FileText,
       },
     ]
   },
