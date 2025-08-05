@@ -33,7 +33,6 @@ export async function executeAction<T>({
 		if (isRedirectError(error)) {
 			throw error;
 		}
-		console.error(serverErrorMessage, error);
 		return {
 			success: false,
 			message: getErrorMessage(error),

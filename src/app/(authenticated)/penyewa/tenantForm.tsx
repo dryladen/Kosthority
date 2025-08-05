@@ -51,7 +51,6 @@ const TenantForm = ({
     },
   });
 
-  // Simple mutations without utils
   const updateTenant = api.tenant.update.useMutation({
     onSuccess: () => {
       toast.success("Data berhasil diperbarui");
@@ -101,8 +100,6 @@ const TenantForm = ({
         });
       }
     } catch (error) {
-      // Error handling sudah ada di mutation callbacks
-      console.error("Form submission error:", error);
     }
   };
 
@@ -172,7 +169,7 @@ const TenantForm = ({
       </ResponsiveDialog>
       {!modeUpdate && (
         <Button type="button" onClick={handleButtonClick}>
-          <PlusCircle className="mr-2" size={16} />
+          <PlusCircle size={16} />
           <span className="hidden sm:flex">Tambah data</span>
         </Button>
       )}

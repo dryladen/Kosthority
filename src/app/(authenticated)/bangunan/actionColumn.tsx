@@ -41,7 +41,6 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
     try {
       await deleteApartment.mutateAsync(row.getValue("id"));
     } catch (error) {
-      console.error("Delete error:", error);
     }
   };
 

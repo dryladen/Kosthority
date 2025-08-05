@@ -89,6 +89,10 @@ export const paymentRouter = createTRPCRouter({
         .input(paymentSchema)
         .mutation(async ({ ctx, input }) => {
             const supabase = await createClient();
+            
+            // Convert month format (YYYY-MM) to date format (YYYY-MM-DD) for database
+            const forMonthDate = `${input.for_month}-01`;
+            
             const { data, error } = await supabase
                 .from("payments")
                 .insert({
@@ -96,7 +100,7 @@ export const paymentRouter = createTRPCRouter({
                     rental_id: input.rental_id,
                     amount: input.amount,
                     note: input.note,
-                    for_month: input.for_month,
+                    for_month: forMonthDate,
                     created_at: new Date().toISOString(),
                 })
                 .select();
@@ -108,13 +112,17 @@ export const paymentRouter = createTRPCRouter({
         .input(paymentSchema)
         .mutation(async ({ ctx, input }) => {
             const supabase = await createClient();
+            
+            // Convert month format (YYYY-MM) to date format (YYYY-MM-DD) for database
+            const forMonthDate = `${input.for_month}-01`;
+            
             const { data, error } = await supabase
                 .from("payments")
                 .update({
                     rental_id: input.rental_id,
                     amount: input.amount,
                     note: input.note,
-                    for_month: input.for_month,
+                    for_month: forMonthDate,
                 })
                 .eq("id", input.id)
                 .select();

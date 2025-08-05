@@ -1,6 +1,6 @@
 "use client"
 import { Row } from "@tanstack/react-table";
-import { MoreHorizontal, Edit, Trash2, Receipt } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Receipt, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { Payment } from "@/utils/types";
 import PaymentForm from "./paymentForm";
+import Link from "next/link";
 
 interface ActionColumnProps<TData>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -43,7 +44,6 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
     try {
       await deletePayment.mutateAsync(row.getValue("id"));
     } catch (error) {
-      console.error("Delete error:", error);
     }
   };
 
@@ -56,11 +56,19 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
   };
 
   const handlePrintReceipt = () => {
-    // TODO: Implement receipt printing
     toast.info("Fitur cetak struk akan datang");
   };
 
-  const paymentData = row.original as Payment;
+  const paymentData = row.original as Payment & { 
+    rentals: { 
+      monthly_price: string;
+      houses: { name: string; apartments: { name: string } };
+      tenants: { name: string; phone: string }
+    }
+  };
+
+  // Get rental_id for navigation to detail pembayaran
+  const rentalId = paymentData.rental_id;
 
   return (
     <>
@@ -87,12 +95,22 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Fitur</DropdownMenuLabel>
           <DropdownMenuItem asChild>
+            <Link
+              href={`/laporan/detail/${rentalId}`}
+              className="flex gap-2 font-medium items-center w-full"
+              prefetch={false}
+            >
+              <Eye className="h-4 w-4" />
+              <span>Detail Pembayaran</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Button
               onClick={handlePrintReceipt}
               className="w-full justify-start h-fit border-0"
               variant="ghost"
             >
-              <Receipt className="h-4 w-4 mr-2" />
+              <Receipt className="h-4 w-4" />
               <span>Cetak Struk</span>
             </Button>
           </DropdownMenuItem>
@@ -103,7 +121,7 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
               className="w-full justify-start h-fit border-0"
               variant="ghost"
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4" />
               <span>Edit</span>
             </Button>
           </DropdownMenuItem>

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const rentalSchema = z.object({
-    id: z.string().min(1, "ID is required").optional(),
+    id: z.number().min(1, "ID is required").optional(),
     house_id: z.string().min(1, "House ID is required"),
     tenant_id: z.string().min(1, "Tenant ID is required"),
     move_in: z.string().min(1, "Move in date is required"),

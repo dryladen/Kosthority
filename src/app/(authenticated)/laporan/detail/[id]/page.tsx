@@ -24,28 +24,45 @@ export default async function DetailPembayaranPage({ params }: Props) {
     const totalPaid = payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
     const monthlyPrice = parseFloat(rental.monthly_price);
     
-    // Calculate months since move-in
-    const moveInDate = new Date(rental.move_in);
-    const currentDate = new Date();
-    const totalMonthsRented = Math.ceil(
-      (currentDate.getTime() - moveInDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
-    );
+    // Calculate months since move-in (up to previous month)
+    const moveInDateStr = rental.move_in;
+    const [yearStr, monthStr] = moveInDateStr.split('-');
+    const moveInYear = parseInt(yearStr);
+    const moveInMonth = parseInt(monthStr);
     
-    const expectedTotal = monthlyPrice * Math.max(1, totalMonthsRented);
+    const currentDate = new Date();
+    const checkUntilYear = currentDate.getFullYear();
+    const checkUntilMonth = currentDate.getMonth() - 1;
+    
+    let monthCount = 0;
+    const startMonth = new Date(Date.UTC(moveInYear, moveInMonth - 1, 1));
+    const endMonth = new Date(Date.UTC(checkUntilYear, checkUntilMonth, 1));
+    
+    for (let d = new Date(startMonth); d <= endMonth; d.setUTCMonth(d.getUTCMonth() + 1)) {
+      monthCount++;
+    }
+    
+    const totalMonthsRented = Math.max(1, monthCount);
+    const expectedTotal = monthlyPrice * totalMonthsRented;
     const balance = totalPaid - expectedTotal;
     
-    // Get payment months
-    const paidMonths = payments.map(p => p.for_month).sort();
-    
-    // Find missing months
+    // Find missing months and partial payments
     const missingMonths = [];
-    const startDate = new Date(rental.move_in);
-    const endDate = new Date();
+    const partialPaymentMonths = [];
     
-    for (let d = new Date(startDate); d <= endDate; d.setMonth(d.getMonth() + 1)) {
+    for (let d = new Date(startMonth); d <= endMonth; d.setUTCMonth(d.getUTCMonth() + 1)) {
       const monthStr = d.toISOString().slice(0, 7);
-      if (!paidMonths.includes(monthStr)) {
+      const monthPayments = payments.filter(p => p.for_month.startsWith(monthStr));
+      const totalPaidForMonth = monthPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+      
+      if (monthPayments.length === 0) {
         missingMonths.push(monthStr);
+      } else if (totalPaidForMonth < monthlyPrice) {
+        partialPaymentMonths.push({
+          month: monthStr,
+          paid: totalPaidForMonth,
+          remaining: monthlyPrice - totalPaidForMonth
+        });
       }
     }
 
@@ -57,7 +74,7 @@ export default async function DetailPembayaranPage({ params }: Props) {
             <div className="flex items-center gap-4 mb-4">
               <Button variant="outline" size="sm" asChild>
                 <Link href="/penghuni">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  <ArrowLeft className="h-4 w-4" />
                   Kembali
                 </Link>
               </Button>
@@ -180,7 +197,7 @@ export default async function DetailPembayaranPage({ params }: Props) {
               <CardHeader>
                 <CardTitle className="text-red-600">Bulan Belum Dibayar</CardTitle>
                 <CardDescription>
-                  Bulan-bulan yang belum ada pembayarannya
+                  Bulan-bulan yang belum ada pembayarannya sama sekali
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -192,6 +209,48 @@ export default async function DetailPembayaranPage({ params }: Props) {
                         month: "long",
                       })}
                     </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Partial Payments */}
+          {partialPaymentMonths.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-orange-600">Pembayaran Belum Lunas</CardTitle>
+                <CardDescription>
+                  Bulan-bulan dengan pembayaran tidak lengkap
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {partialPaymentMonths.map((partial) => (
+                    <div key={partial.month} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">
+                          {new Date(partial.month + "-01").toLocaleDateString("id-ID", {
+                            year: "numeric",
+                            month: "long",
+                          })}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Sudah dibayar: {new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                          }).format(partial.paid)}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                        Kurang {new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                          minimumFractionDigits: 0,
+                        }).format(partial.remaining)}
+                      </Badge>
+                    </div>
                   ))}
                 </div>
               </CardContent>
@@ -211,42 +270,67 @@ export default async function DetailPembayaranPage({ params }: Props) {
                 <div className="space-y-4">
                   {payments
                     .sort((a, b) => new Date(b.for_month).getTime() - new Date(a.for_month).getTime())
-                    .map((payment) => (
-                    <div key={payment.id} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium">
-                            Pembayaran {new Date(payment.for_month + "-01").toLocaleDateString("id-ID", {
-                              year: "numeric",
-                              month: "long",
-                            })}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Dibayar: {new Date(payment.created_at).toLocaleDateString("id-ID")}
-                          </p>
-                          {payment.note && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Catatan: {payment.note}
-                            </p>
-                          )}
+                    .map((payment) => {
+                      const paymentMonth = payment.for_month.slice(0, 7);
+                      const allPaymentsForThisMonth = payments.filter(p => p.for_month.startsWith(paymentMonth));
+                      const totalPaidForThisMonth = allPaymentsForThisMonth.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                      const isMonthFullyPaid = totalPaidForThisMonth >= monthlyPrice;
+                      
+                      return (
+                        <div key={payment.id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-medium">
+                                Pembayaran untuk bulan {payment.for_month.startsWith('2025-') || payment.for_month.startsWith('2024-')
+                                  ? new Date(payment.for_month.slice(0, 7) + "-01").toLocaleDateString("id-ID", {
+                                      month: "long",
+                                      year: "numeric",
+                                    })
+                                  : "bulan tidak valid"}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                Dibayar: {new Date(payment.created_at).toLocaleDateString("id-ID")}
+                              </p>
+                              {payment.note && (
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Catatan: {payment.note}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-green-600">
+                                {new Intl.NumberFormat("id-ID", {
+                                  style: "currency",
+                                  currency: "IDR",
+                                  minimumFractionDigits: 0,
+                                }).format(parseFloat(payment.amount))}
+                              </p>
+                              {parseFloat(payment.amount) !== monthlyPrice && (
+                                <div className="flex flex-col items-end gap-1">
+                                  <p className="text-xs text-muted-foreground">
+                                    {parseFloat(payment.amount) > monthlyPrice ? 'Lebih bayar' : 'Bayar sebagian'}
+                                  </p>
+                                  {parseFloat(payment.amount) < monthlyPrice && !isMonthFullyPaid && (
+                                    <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
+                                      Bulan ini kurang {new Intl.NumberFormat("id-ID", {
+                                        style: "currency",
+                                        currency: "IDR",
+                                        minimumFractionDigits: 0,
+                                      }).format(monthlyPrice - totalPaidForThisMonth)}
+                                    </Badge>
+                                  )}
+                                  {parseFloat(payment.amount) < monthlyPrice && isMonthFullyPaid && allPaymentsForThisMonth.length > 1 && (
+                                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                      Bulan ini sudah lunas
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-green-600">
-                            {new Intl.NumberFormat("id-ID", {
-                              style: "currency",
-                              currency: "IDR",
-                              minimumFractionDigits: 0,
-                            }).format(parseFloat(payment.amount))}
-                          </p>
-                          {parseFloat(payment.amount) !== monthlyPrice && (
-                            <p className="text-xs text-muted-foreground">
-                              {parseFloat(payment.amount) > monthlyPrice ? 'Lebih bayar' : 'Bayar sebagian'}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
@@ -264,8 +348,8 @@ export default async function DetailPembayaranPage({ params }: Props) {
             <CardContent>
               <div className="flex gap-2">
                 <Button asChild>
-                  <Link href={`/tagihan?rental=${id}`}>
-                    <CreditCard className="h-4 w-4 mr-2" />
+                  <Link href={`/pembayaran?rental=${id}`}>
+                    <CreditCard className="h-4 w-4" />
                     Catat Pembayaran
                   </Link>
                 </Button>

@@ -25,7 +25,7 @@ export type Tenant = {
 };
 
 export type Rental = {
-    id: string; // bigint
+    id: number; // bigint
     house_id: string; // uuid
     tenant_id: string; // uuid
     move_in: string; // date
@@ -36,8 +36,8 @@ export type Rental = {
 };
 
 export type Payment = {
-    id: string; // bigint
-    rental_id: string; // bigint
+    id: number; // bigint
+    rental_id: number; // bigint
     amount: string; // text
     note?: string; // text
     for_month: string; // date

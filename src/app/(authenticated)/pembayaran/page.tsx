@@ -4,6 +4,10 @@ import PaymentPage from './paymentPage'
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Disable static generation untuk real-time data
 
-export default async function page() {
-  return <PaymentPage/>
+interface PageProps {
+  searchParams: { rental?: string }
+}
+
+export default async function page({ searchParams }: PageProps) {
+  return <PaymentPage preSelectedRentalId={searchParams.rental} />
 }

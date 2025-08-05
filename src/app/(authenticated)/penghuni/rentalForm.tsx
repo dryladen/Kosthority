@@ -53,18 +53,17 @@ const RentalForm = ({
       status: "active",
       note: "",
     } : {
-      id: data?.id || "",
+      id: data?.id || undefined,
       house_id: data?.house_id || "",
       tenant_id: data?.tenant_id || "",
-      move_in: data?.move_in || "",
-      move_out: data?.move_out || "",
+      move_in: data?.move_in ? new Date(data.move_in).toISOString().split('T')[0] : "",
+      move_out: data?.move_out ? new Date(data.move_out).toISOString().split('T')[0] : "",
       monthly_price: data?.monthly_price || "",
       status: data?.status || "active",
       note: data?.note || "",
     },
   });
 
-  // Simple mutations without utils
   const updateRental = api.rental.update.useMutation({
     onSuccess: () => {
       toast.success("Data berhasil diperbarui");
@@ -99,11 +98,14 @@ const RentalForm = ({
 
   const onSubmit: SubmitHandler<z.infer<typeof rentalSchema>> = async (formData) => {
     setLoading(true);
-    
+      
     try {
       if (modeUpdate) {
+        if (!formData.id) {
+          throw new Error("ID is required for update");
+        }
         await updateRental.mutateAsync({
-          id: formData.id ?? "",
+          id: formData.id,
           house_id: formData.house_id,
           tenant_id: formData.tenant_id,
           move_in: formData.move_in,
@@ -124,12 +126,9 @@ const RentalForm = ({
         });
       }
     } catch (error) {
-      // Error handling sudah ada di mutation callbacks
-      console.error("Form submission error:", error);
+      setLoading(false);
     }
-  };
-
-  const handleButtonClick = () => {
+  };  const handleButtonClick = () => {
     setIsOpen(true);
   };
 
@@ -258,15 +257,21 @@ const RentalForm = ({
               className="w-full"
               disabled={loading}
             >
-              {loading && <LoaderCircle size={24} className="animate-spin" />}
-              Simpan
+              {loading ? (
+                <>
+                  <LoaderCircle size={16} className="animate-spin" />
+                  {modeUpdate ? "Memperbarui..." : "Menyimpan..."}
+                </>
+              ) : (
+                modeUpdate ? "Perbarui Data" : "Simpan Data"
+              )}
             </Button>
           </form>
         </Form>
       </ResponsiveDialog>
       {!modeUpdate && (
         <Button type="button" onClick={handleButtonClick}>
-          <PlusCircle className="mr-2" size={16} />
+          <PlusCircle size={16} />
           <span className="hidden sm:flex">Tambah data</span>
         </Button>
       )}

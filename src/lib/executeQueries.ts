@@ -21,7 +21,6 @@ export async function executeQuery<T>({
 		}
 		return await queryFn();
 	} catch (error) {
-		console.error(serverErrorMessage, error);
 		return null;
 	}
 }

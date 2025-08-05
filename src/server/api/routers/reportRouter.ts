@@ -51,34 +51,63 @@ export const reportRouter = createTRPCRouter({
     const paymentStatus = typedRentals?.map(rental => {
       const rentalPayments = payments?.filter(p => p.rental_id === rental.id) || [];
       
-      // Calculate months from move_in to current date
-      const moveInDate = new Date(rental.move_in);
+      // Calculate months from move_in to previous month
+      const moveInDateStr = rental.move_in;
+      const [yearStr, monthStr] = moveInDateStr.split('-');
+      const moveInYear = parseInt(yearStr);
+      const moveInMonth = parseInt(monthStr);
+      
       const currentDate = new Date();
-      const totalMonthsRented = Math.ceil(
-        (currentDate.getTime() - moveInDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
-      );
+      const checkUntilYear = currentDate.getFullYear();
+      const checkUntilMonth = currentDate.getMonth() - 1;
+      
+      let monthCount = 0;
+      
+      // Create start and end month strings directly without Date object intermediary
+      const startMonthStr = `${moveInYear.toString().padStart(4, '0')}-${moveInMonth.toString().padStart(2, '0')}`;
+      const endMonthStr = `${checkUntilYear.toString().padStart(4, '0')}-${(checkUntilMonth + 1).toString().padStart(2, '0')}`;
+      
+      // Create Date objects only for comparison - use UTC to avoid timezone issues
+      const startMonth = new Date(Date.UTC(moveInYear, moveInMonth - 1, 1));
+      const endMonth = new Date(Date.UTC(checkUntilYear, checkUntilMonth, 1));
+      
+      for (let d = new Date(startMonth); d <= endMonth; d.setUTCMonth(d.getUTCMonth() + 1)) {
+        monthCount++;
+      }
+      
+      const totalMonthsRented = Math.max(1, monthCount);
       
       // Calculate total amount paid and expected
       const totalPaid = rentalPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
       const monthlyPrice = parseFloat(rental.monthly_price);
-      const expectedTotal = monthlyPrice * Math.max(1, totalMonthsRented);
+      const expectedTotal = monthlyPrice * totalMonthsRented;
       
       // Calculate balance
       const balance = totalPaid - expectedTotal;
       
-      // Get payment months
+      // Get payment months and amounts
       const paidMonths = rentalPayments.map(p => p.for_month).sort();
       const currentMonth = new Date().toISOString().slice(0, 7);
       
-      // Find missing months
+      // Find missing months - only include months that should have been paid
+      // Also check if payment amount is sufficient for each month
       const missingMonths = [];
-      const startDate = new Date(rental.move_in);
-      const endDate = new Date();
+      const partialPaymentMonths = [];
       
-      for (let d = new Date(startDate); d <= endDate; d.setMonth(d.getMonth() + 1)) {
+      // Use the same startMonth and endMonth from above calculation
+      for (let d = new Date(startMonth); d <= endMonth; d.setUTCMonth(d.getUTCMonth() + 1)) {
         const monthStr = d.toISOString().slice(0, 7);
-        if (!paidMonths.includes(monthStr)) {
+        const monthPayments = rentalPayments.filter(p => p.for_month.startsWith(monthStr));
+        const totalPaidForMonth = monthPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+        
+        if (monthPayments.length === 0) {
           missingMonths.push(monthStr);
+        } else if (totalPaidForMonth < monthlyPrice) {
+          partialPaymentMonths.push({
+            month: monthStr,
+            paid: totalPaidForMonth,
+            remaining: monthlyPrice - totalPaidForMonth
+          });
         }
       }
       
@@ -91,6 +120,7 @@ export const reportRouter = createTRPCRouter({
         totalMonthsRented,
         paidMonths: paidMonths.length,
         missingMonths,
+        partialPaymentMonths,
         status: balance >= 0 ? (balance > monthlyPrice ? 'overpaid' : 'current') : 'behind',
         lastPayment: rentalPayments.length > 0 ? Math.max(...rentalPayments.map(p => new Date(p.for_month).getTime())) : null
       };

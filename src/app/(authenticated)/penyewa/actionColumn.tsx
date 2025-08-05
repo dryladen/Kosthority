@@ -43,7 +43,6 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
     try {
       await deleteTenant.mutateAsync(row.getValue("id"));
     } catch (error) {
-      console.error("Delete error:", error);
     }
   };
 
@@ -87,7 +86,7 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
               className="w-full justify-start h-fit border-0"
               variant="ghost"
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4" />
               <span>Edit</span>
             </Button>
           </DropdownMenuItem>

@@ -1,7 +1,9 @@
 import { api, HydrateClient } from "@/trpc/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle, DollarSign, Calendar, User, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, CheckCircle, DollarSign, Calendar, User, Home, Eye } from "lucide-react";
+import Link from "next/link";
 
 export default async function LaporanPage() {
   const paymentStatus = await api.report.paymentStatus();
@@ -189,6 +191,47 @@ export default async function LaporanPage() {
                           </div>
                         </div>
                       )}
+
+                      {rental.partialPaymentMonths && rental.partialPaymentMonths.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm text-muted-foreground mb-2">Pembayaran belum lunas:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {rental.partialPaymentMonths.slice(0, 6).map((partial) => (
+                              <Badge key={partial.month} variant="secondary" className="text-xs">
+                                {new Date(partial.month + "-01").toLocaleDateString("id-ID", {
+                                  year: "numeric",
+                                  month: "long",
+                                })} - Kurang {new Intl.NumberFormat("id-ID", {
+                                  style: "currency",
+                                  currency: "IDR",
+                                  minimumFractionDigits: 0,
+                                }).format(partial.remaining)}
+                              </Badge>
+                            ))}
+                            {rental.partialPaymentMonths.length > 6 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{rental.partialPaymentMonths.length - 6} lainnya
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      <div className="mt-4 flex gap-2">
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href={`/laporan/detail/${rental.rental.id}`}>
+                            <Eye className="h-4 w-4" />
+                            Detail Pembayaran
+                          </Link>
+                        </Button>
+                        <Button size="sm" variant="default" asChild>
+                          <Link href={`/pembayaran?rental=${rental.rental.id}`}>
+                            <DollarSign className="h-4 w-4" />
+                            Catat Pembayaran
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>

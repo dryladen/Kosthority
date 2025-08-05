@@ -41,14 +41,12 @@ export async function syncRoomStatus() {
                     .eq("id", room.id);
 
                 if (updateError) {
-                    console.error(`Failed to update room ${room.id} status:`, updateError);
                 }
             }
         }
 
         return { success: true, message: "Room statuses synced successfully" };
     } catch (error) {
-        console.error("Error syncing room status:", error);
         return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
 }

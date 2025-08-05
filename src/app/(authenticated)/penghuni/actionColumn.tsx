@@ -1,6 +1,6 @@
 "use client"
 import { Row } from "@tanstack/react-table";
-import { MoreHorizontal, Edit, Trash2, CreditCard, XCircle, Ban, DollarSign } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, CreditCard, XCircle, Ban, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -80,7 +80,6 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
         try {
             await deleteRental.mutateAsync(String(row.getValue("id")));
         } catch (error) {
-            console.error("Delete error:", error);
         }
     };
 
@@ -91,7 +90,6 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
                 status: "completed"
             });
         } catch (error) {
-            console.error("Terminate error:", error);
         }
     };
 
@@ -102,7 +100,6 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
                 status: "cancelled"
             });
         } catch (error) {
-            console.error("Cancel error:", error);
         }
     };
 
@@ -172,22 +169,22 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
                     <DropdownMenuLabel>Fitur</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
                         <Link
-                            href={`/tagihan?rental=${rentalId}`}
-                            className="flex items-center w-full"
+                            href={`/laporan/detail/${rentalId}`}
+                            className="flex gap-2 font-medium items-center w-full"
                             prefetch={false}
                         >
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            <span>Lihat Tagihan</span>
+                            <Eye className="h-4 w-4" />
+                            <span>Detail Pembayaran</span>
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
-                            href={`/laporan/detail/${rentalId}`}
-                            className="flex items-center w-full"
+                            href={`/pembayaran?rental=${rentalId}`}
+                            className="flex gap-2 font-medium items-center w-full"
                             prefetch={false}
                         >
-                            <DollarSign className="h-4 w-4 mr-2" />
-                            <span>Detail Pembayaran</span>
+                            <CreditCard className="h-4 w-4" />
+                            <span>Catat Pembayaran</span>
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -197,7 +194,7 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
                             className="w-full justify-start h-fit border-0"
                             variant="ghost"
                         >
-                            <Edit className="h-4 w-4 mr-2" />
+                            <Edit className="h-4 w-4" />
                             <span>Edit</span>
                         </Button>
                     </DropdownMenuItem>
@@ -210,7 +207,7 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
                                     className="w-full justify-start h-fit border-0 text-orange-600 hover:text-orange-700"
                                     variant="ghost"
                                 >
-                                    <XCircle className="h-4 w-4 mr-2" />
+                                    <XCircle className="h-4 w-4" />
                                     <span>Akhiri Sewa</span>
                                 </Button>
                             </DropdownMenuItem>
@@ -220,7 +217,7 @@ export function ActionColumn<TData>({ row }: ActionColumnProps<TData>) {
                                     className="w-full justify-start h-fit border-0 text-red-600 hover:text-red-700"
                                     variant="ghost"
                                 >
-                                    <Ban className="h-4 w-4 mr-2" />
+                                    <Ban className="h-4 w-4" />
                                     <span>Batalkan Kontrak</span>
                                 </Button>
                             </DropdownMenuItem>

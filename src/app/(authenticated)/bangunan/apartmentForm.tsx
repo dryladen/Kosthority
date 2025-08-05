@@ -55,7 +55,6 @@ const ApartmentForm = ({
     },
   });
 
-  // Simple mutations without utils
   const updateApartment = api.apartment.update.useMutation({
     onSuccess: () => {
       toast.success("Data berhasil diperbarui");
@@ -109,8 +108,6 @@ const ApartmentForm = ({
         });
       }
     } catch (error) {
-      // Error handling sudah ada di mutation callbacks
-      console.error("Form submission error:", error);
     }
   };
 

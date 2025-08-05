@@ -5,7 +5,6 @@ import { Building2, Bed, Users, DollarSign, Calendar, Phone, AlertTriangle } fro
 import Link from "next/link";
 
 export default async function BerandaPage() {
-  // Fetch all data in parallel
   const [apartments, rooms, rentals, payments, paymentStatus] = await Promise.all([
     api.apartment.list(),
     api.room.list(),
@@ -14,18 +13,15 @@ export default async function BerandaPage() {
     api.report.paymentStatus(),
   ]);
 
-  // Calculate statistics
   const totalApartments = apartments?.length || 0;
   const totalRooms = rooms?.length || 0;
   const activeRentals = rentals?.filter(rental => rental.status === "active") || [];
   const totalActiveRentals = activeRentals.length;
 
-  // Room status statistics
   const availableRooms = rooms?.filter(room => room.status === 'available')?.length || 0;
   const occupiedRooms = rooms?.filter(room => room.status === 'occupied')?.length || 0;
   const maintenanceRooms = rooms?.filter(room => room.status === 'maintenance')?.length || 0;
 
-  // Current month revenue
   const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
   const currentMonthPayments = payments?.filter(payment => 
     payment.for_month.startsWith(currentMonth)
@@ -34,14 +30,11 @@ export default async function BerandaPage() {
     total + parseFloat(payment.amount), 0
   );
 
-  // Recent payments (last 5)
   const recentPayments = payments?.slice(0, 5) || [];
 
-  // Payment status summary
   const behindRentals = paymentStatus?.filter(r => r.status === 'behind') || [];
   const totalOutstanding = behindRentals.reduce((sum: number, rental) => sum + Math.abs(rental.balance), 0);
 
-  // Prefetch data for client components
   void api.apartment.list.prefetch();
   void api.room.list.prefetch();
   void api.rental.list.prefetch();
@@ -58,8 +51,6 @@ export default async function BerandaPage() {
             Ringkasan informasi manajemen kost Anda
           </p>
         </div>
-
-        {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -73,7 +64,6 @@ export default async function BerandaPage() {
               </p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Kamar</CardTitle>
@@ -86,7 +76,6 @@ export default async function BerandaPage() {
               </p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Penghuni Aktif</CardTitle>
@@ -99,7 +88,6 @@ export default async function BerandaPage() {
               </p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pendapatan Bulan Ini</CardTitle>
@@ -119,8 +107,6 @@ export default async function BerandaPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Room Status Overview */}
         <Card>
           <CardHeader>
             <CardTitle>Status Kamar</CardTitle>
@@ -160,8 +146,6 @@ export default async function BerandaPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Payment Status Alert */}
         {behindRentals.length > 0 && (
           <Card className="border-red-200 bg-red-50">
             <CardHeader>
@@ -197,12 +181,11 @@ export default async function BerandaPage() {
         )}
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Recent Payments */}
           <Card>
             <CardHeader>
               <CardTitle>Pembayaran Terbaru</CardTitle>
               <CardDescription>
-                5 pembayaran terakhir yang diterima
+                {recentPayments.length} pembayaran terakhir yang diterima
               </CardDescription>
             </CardHeader>
             <CardContent>

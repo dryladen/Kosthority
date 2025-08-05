@@ -3,7 +3,11 @@ import { columns } from "./column";
 import { api, HydrateClient } from "@/trpc/server";
 import PaymentForm from "./paymentForm";
 
-export default async function PaymentPage() {
+interface PaymentPageProps {
+  preSelectedRentalId?: string;
+}
+
+export default async function PaymentPage({ preSelectedRentalId }: PaymentPageProps) {
   const data = await api.payment.list();
   void api.payment.list.prefetch();
   
@@ -15,6 +19,7 @@ export default async function PaymentPage() {
             title="Catat Pembayaran" 
             description="Catat pembayaran dari penyewa"
             modeUpdate={false}
+            preSelectedRentalId={preSelectedRentalId}
           />
         </DataTable>
       </div>
