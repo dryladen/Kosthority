@@ -28,7 +28,11 @@ export const signUpAction = async (formData: FormData) => {
   });
 
   if (error) {
-    return { error: error.message };
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      error.message,
+    );
   } else {
     return encodedRedirect(
       "success",
