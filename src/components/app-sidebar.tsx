@@ -59,8 +59,8 @@ const menuGroups = [
         icon: ArrowRightLeft,
       },
       {
-        title: "Tagihan",
-        url: "/tagihan",
+        title: "Pembayaran",
+        url: "/pembayaran",
         icon: FileText,
       },
     ]

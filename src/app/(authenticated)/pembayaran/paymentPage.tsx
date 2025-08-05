@@ -10,7 +10,7 @@ export default async function PaymentPage() {
   return (
     <HydrateClient>
       <div className="space-y-4">
-        <DataTable title="Tagihan & Pembayaran" search="tenantName" columns={columns} data={data ?? []}>
+        <DataTable title="Pembayaran" search="tenantName" columns={columns} data={data ?? []}>
           <PaymentForm 
             title="Catat Pembayaran" 
             description="Catat pembayaran dari penyewa"
