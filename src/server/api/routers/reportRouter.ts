@@ -181,4 +181,169 @@ export const reportRouter = createTRPCRouter({
         payments: payments || []
       };
     }),
+  
+  // Financial Report - Net Income per apartment per month
+  financialReport: authProcedure
+    .input(z.object({
+      apartment_id: z.string().optional(),
+      year: z.number().min(2020).max(2030),
+      month: z.number().min(1).max(12)
+    }))
+    .query(async ({ input }) => {
+      const supabase = await createClient();
+      
+      // Calculate date range for the month
+      const startDate = new Date(input.year, input.month - 1, 1).toISOString().split('T')[0];
+      const endDate = new Date(input.year, input.month, 0).toISOString().split('T')[0];
+      
+      // Get payments for the month
+      const paymentsQuery = supabase
+        .from("payments")
+        .select(`
+          amount,
+          for_month,
+          rentals!inner(
+            monthly_price,
+            houses!inner(
+              apartment_id,
+              apartments!inner(name)
+            )
+          )
+        `)
+        .gte("for_month", `${input.year}-${String(input.month).padStart(2, '0')}-01`)
+        .lt("for_month", `${input.year}-${String(input.month + 1).padStart(2, '0')}-01`);
+      console.log("Payments query:", paymentsQuery.toString());
+      if (input.apartment_id) {
+        paymentsQuery.eq("rentals.houses.apartment_id", input.apartment_id);
+      }
+      
+      const { data: payments, error: paymentsError } = await paymentsQuery;
+      if (paymentsError) throw new Error(paymentsError.message);
+      
+      // Type cast payments to ensure proper typing
+      const typedPayments = payments as unknown as Array<{
+        amount: string;
+        for_month: string;
+        rentals: {
+          monthly_price: string;
+          houses: {
+            apartment_id: string;
+            apartments: { name: string };
+          };
+        };
+      }>;
+      
+      // Get expenses for the month
+      const expensesQuery = supabase
+        .from("expenses")
+        .select(`
+          amount,
+          category,
+          description,
+          expense_date,
+          apartment_id,
+          apartments!inner(name)
+        `)
+        .gte("expense_date", startDate)
+        .lte("expense_date", endDate);
+        
+      if (input.apartment_id) {
+        expensesQuery.eq("apartment_id", input.apartment_id);
+      }
+      
+      const { data: expenses, error: expensesError } = await expensesQuery;
+      if (expensesError) throw new Error(expensesError.message);
+      
+      // Type cast expenses to ensure proper typing
+      const typedExpenses = expenses as unknown as Array<{
+        amount: string;
+        category: string;
+        description: string;
+        expense_date: string;
+        apartment_id: string;
+        apartments: { name: string };
+      }>;
+      
+      // Calculate totals
+      const totalIncome = typedPayments?.reduce((sum, payment) => sum + parseFloat(payment.amount), 0) || 0;
+      const totalExpenses = typedExpenses?.reduce((sum, expense) => sum + parseFloat(expense.amount), 0) || 0;
+      const netIncome = totalIncome - totalExpenses;
+      
+      // Group by apartment if no specific apartment selected
+      const apartmentReports: Record<string, {
+        apartmentName: string;
+        income: number;
+        expenses: number;
+        netIncome: number;
+        expensesByCategory: Record<string, number>;
+      }> = {};
+      
+      if (!input.apartment_id) {
+        // Group payments by apartment
+        typedPayments?.forEach(payment => {
+          const apartmentName = payment.rentals.houses.apartments.name;
+          if (!apartmentReports[apartmentName]) {
+            apartmentReports[apartmentName] = {
+              apartmentName,
+              income: 0,
+              expenses: 0,
+              netIncome: 0,
+              expensesByCategory: {}
+            };
+          }
+          apartmentReports[apartmentName].income += parseFloat(payment.amount);
+        });
+        
+        // Group expenses by apartment
+        typedExpenses?.forEach(expense => {
+          const apartmentName = expense.apartments.name;
+          if (!apartmentReports[apartmentName]) {
+            apartmentReports[apartmentName] = {
+              apartmentName,
+              income: 0,
+              expenses: 0,
+              netIncome: 0,
+              expensesByCategory: {}
+            };
+          }
+          apartmentReports[apartmentName].expenses += parseFloat(expense.amount);
+          
+          if (!apartmentReports[apartmentName].expensesByCategory[expense.category]) {
+            apartmentReports[apartmentName].expensesByCategory[expense.category] = 0;
+          }
+          apartmentReports[apartmentName].expensesByCategory[expense.category] += parseFloat(expense.amount);
+        });
+        
+        // Calculate net income for each apartment
+        Object.values(apartmentReports).forEach(report => {
+          report.netIncome = report.income - report.expenses;
+        });
+      }
+      
+      // Expense breakdown by category
+      const expensesByCategory = typedExpenses?.reduce((acc, expense) => {
+        if (!acc[expense.category]) {
+          acc[expense.category] = 0;
+        }
+        acc[expense.category] += parseFloat(expense.amount);
+        return acc;
+      }, {} as Record<string, number>) || {};
+      
+      return {
+        totalIncome,
+        totalExpenses,
+        netIncome,
+        expensesByCategory,
+        apartmentReports: Object.values(apartmentReports),
+        payments: typedPayments || [],
+        expenses: typedExpenses || [],
+        period: {
+          year: input.year,
+          month: input.month,
+          startDate,
+          endDate
+        }
+      };
+    }),
+
 });

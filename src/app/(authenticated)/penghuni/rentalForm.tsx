@@ -13,6 +13,7 @@ import { api } from "@/trpc/react";
 import { rentalSchema } from "@/utils/schemas/rental";
 import { Rental } from "@/utils/types";
 import { toast } from "sonner";
+import SelectBox from "@/components/form-controller/selectionBox";
 
 type Props = {
   data?: Rental;
@@ -38,7 +39,7 @@ const RentalForm = ({
   // Fetch rooms and tenants for selection
   const { data: rooms, isLoading: roomsLoading } = api.room.list.useQuery();
   const { data: tenants, isLoading: tenantsLoading } = api.tenant.list.useQuery();
-  
+
   // Get utils for cache invalidation
   const utils = api.useUtils();
 
@@ -98,7 +99,7 @@ const RentalForm = ({
 
   const onSubmit: SubmitHandler<z.infer<typeof rentalSchema>> = async (formData) => {
     setLoading(true);
-      
+
     try {
       if (modeUpdate) {
         if (!formData.id) {
@@ -128,7 +129,7 @@ const RentalForm = ({
     } catch (error) {
       setLoading(false);
     }
-  };  const handleButtonClick = () => {
+  }; const handleButtonClick = () => {
     setIsOpen(true);
   };
 
@@ -143,56 +144,27 @@ const RentalForm = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
+              <SelectBox
                 control={form.control}
                 name="tenant_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Penyewa</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        disabled={tenantsLoading}
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="">{tenantsLoading ? "Loading..." : "Pilih penyewa"}</option>
-                        {tenants?.map((tenant) => (
-                          <option key={tenant.id} value={tenant.id}>
-                            {tenant.name} - {tenant.phone}
-                          </option>
-                        ))}
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                options={
+                  tenants?.map((tenant) => ({
+                    id: tenant.id,
+                    name: `${tenant.name} - ${tenant.phone}`,
+                  })) || []
+                }
+                label="Penyewa"
               />
-              <FormField
+              <SelectBox
                 control={form.control}
                 name="house_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Kamar</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        disabled={roomsLoading}
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="">{roomsLoading ? "Loading..." : "Pilih kamar"}</option>
-                        {rooms?.filter(room => 
-                          room.status === 'available' || 
-                          (modeUpdate && room.id === data?.house_id)
-                        ).map((room) => (
-                          <option key={room.id} value={room.id}>
-                            {room.apartments?.name} - {room.name}
-                          </option>
-                        ))}
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                options={
+                  rooms?.filter(room => room.status === 'available' || (modeUpdate && room.id === data?.house_id)).map((room) => ({
+                    id: room.id,
+                    name: `${room.apartments.name} - ${room.name}`,
+                  })) || []
+                }
+                label="Kamar"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -218,31 +190,21 @@ const RentalForm = ({
               type="number"
               pattern="[0-9]*"
             />
-            
+
             {modeUpdate && (
-              <FormField
+              <SelectBox
                 control={form.control}
                 name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status Sewa</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="active">Aktif</option>
-                        <option value="completed">Selesai</option>
-                        <option value="terminated">Dihentikan</option>
-                        <option value="cancelled">Dibatalkan</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Status Sewa"
+                options={[
+                  { id: "active", name: "Aktif" },
+                  { id: "completed", name: "Selesai" },
+                  { id: "terminated", name: "Dihentikan" },
+                  { id: "cancelled", name: "Dibatalkan" },
+                ]}
               />
             )}
-            
+
             <Input
               control={form.control}
               name="note"

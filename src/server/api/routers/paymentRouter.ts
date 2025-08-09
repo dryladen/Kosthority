@@ -131,7 +131,7 @@ export const paymentRouter = createTRPCRouter({
         }),
 
     delete: authProcedure
-        .input(z.string().min(1, "ID is required"))
+        .input(z.number().min(1, "ID is required"))
         .mutation(async ({ input }) => {
             const supabase = await createClient();
             const { data, error } = await supabase

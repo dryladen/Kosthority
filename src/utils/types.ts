@@ -42,3 +42,28 @@ export type Payment = {
     note?: string; // text
     for_month: string; // date
 };
+
+export type Expense = {
+    id: string;
+    apartment_id: string;
+    category: 'electricity' | 'water' | 'maintenance' | 'repair' | 'cleaning' | 'supplies' | 'tax' | 'insurance' | 'other';
+    description: string;
+    amount: string;
+    expense_date: string;
+    meter_reading_before?: string;
+    meter_reading_after?: string;
+    receipt_url?: string;
+    note?: string;
+    created_at: string;
+};
+
+export type Note = {
+    id: number;
+    title: string;
+    content: string;
+    category: 'general' | 'maintenance' | 'tenant' | 'payment' | 'important' | 'reminder';
+    priority: 'low' | 'medium' | 'high';
+    apartment_id?: string;
+    created_at: string;
+    updated_at: string;
+};

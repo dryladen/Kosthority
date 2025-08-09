@@ -1,15 +1,16 @@
 import { api, HydrateClient } from "@/trpc/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Bed, Users, DollarSign, Calendar, Phone, AlertTriangle } from "lucide-react";
+import { Building2, Bed, Users, DollarSign, Calendar, Phone, AlertTriangle, Receipt, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 export default async function BerandaPage() {
-  const [apartments, rooms, rentals, payments, paymentStatus] = await Promise.all([
+  const [apartments, rooms, rentals, payments, expenses, paymentStatus] = await Promise.all([
     api.apartment.list(),
     api.room.list(),
     api.rental.list(),
     api.payment.list(),
+    api.expense.list(),
     api.report.paymentStatus(),
   ]);
 
@@ -30,6 +31,20 @@ export default async function BerandaPage() {
     total + parseFloat(payment.amount), 0
   );
 
+  // Calculate current month expenses  
+  const currentDate = new Date();
+  const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0];
+  const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).toISOString().split('T')[0];
+  
+  const currentMonthExpenses = expenses?.filter(expense => 
+    expense.expense_date >= startOfMonth && expense.expense_date <= endOfMonth
+  ) || [];
+  const totalCurrentMonthExpenses = currentMonthExpenses.reduce((total, expense) => 
+    total + parseFloat(expense.amount), 0
+  );
+  
+  const netIncome = currentMonthRevenue - totalCurrentMonthExpenses;
+
   const recentPayments = payments?.slice(0, 5) || [];
 
   const behindRentals = paymentStatus?.filter(r => r.status === 'behind') || [];
@@ -39,6 +54,7 @@ export default async function BerandaPage() {
   void api.room.list.prefetch();
   void api.rental.list.prefetch();
   void api.payment.list.prefetch();
+  void api.expense.list.prefetch();
   void api.report.paymentStatus.prefetch();
 
   return (
@@ -107,6 +123,67 @@ export default async function BerandaPage() {
             </CardContent>
           </Card>
         </div>
+        
+        {/* Financial Summary Grid */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pengeluaran Bulan Ini</CardTitle>
+              <Receipt className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                }).format(totalCurrentMonthExpenses)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {currentMonthExpenses.length} transaksi
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pendapatan Bersih</CardTitle>
+              <TrendingUp className={`h-4 w-4 ${netIncome >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                }).format(netIncome)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {netIncome >= 0 ? 'Profit' : 'Loss'} bulan ini
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tunggakan</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                }).format(totalOutstanding)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {behindRentals.length} penyewa menunggak
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
         <Card>
           <CardHeader>
             <CardTitle>Status Kamar</CardTitle>

@@ -11,6 +11,7 @@ import {
   Home,
   LogOut,
   NotebookText,
+  Receipt,
   User2,
   UserRound,
 } from "lucide-react";
@@ -36,7 +37,6 @@ import {
 import Link from "next/link";
 import { signOutAction } from "@/app/actions";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
 
 // Menu items - Dikelompokkan berdasarkan kategori
 const menuGroups = [
@@ -63,6 +63,11 @@ const menuGroups = [
         url: "/pembayaran",
         icon: FileText,
       },
+      {
+        title: "Pengeluaran",
+        url: "/pengeluaran",
+        icon: Receipt,
+      },
     ]
   },
   {
@@ -86,16 +91,16 @@ const menuGroups = [
     ]
   },
   {
-    label: "Manajemen",
+    label: "Laporan",
     items: [
       {
-        title: "Laporan",
+        title: "Laporan Pembayaran",
         url: "/laporan",
         icon: FileChartColumn,
       },
       {
-        title: "Kalkulasi",
-        url: "/kalkulasi",
+        title: "Laporan Keuangan", 
+        url: "/keuangan",
         icon: Calculator,
       },
       {
