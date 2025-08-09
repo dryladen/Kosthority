@@ -1,7 +1,5 @@
-import React from 'react'
+import NotePage from './notePage';
 
 export default function page() {
-  return (
-    <div>Catatan</div>
-  )
+  return <NotePage />;
 }
