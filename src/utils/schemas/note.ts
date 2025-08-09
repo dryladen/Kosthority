@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const noteSchema = z.object({
-    id: z.string().optional(),
+    id: z.number().optional(),
     title: z.string().min(1, "Judul catatan harus diisi"),
     content: z.string().min(1, "Konten catatan harus diisi"),
     category: z.enum([

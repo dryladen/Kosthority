@@ -49,7 +49,7 @@ const NoteForm = ({
             priority: "medium",
             apartment_id: undefined,
         } : {
-            id: data?.id || "",
+            id: data?.id || undefined,
             title: data?.title || "",
             content: data?.content || "",
             category: data?.category || "general",
